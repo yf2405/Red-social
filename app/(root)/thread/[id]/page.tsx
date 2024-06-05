@@ -1,8 +1,10 @@
 import ThreadCard from "@/components/cards/ThreadCard";
+import Comment from "@/components/forms/Comment";
+import { fetchThreadById } from "@/lib/actions/thread.actions";
 import { fetchUser } from "@/lib/actions/user.actions";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { threadId } from "worker_threads";
+
 
 const page = async ({ params }: { params: { id: string } }) => {
     if (!params.id) return null;
@@ -19,19 +21,42 @@ const page = async ({ params }: { params: { id: string } }) => {
         <section className="relative">
             <div>
                 <ThreadCard
-                    key={threadId._id}
-                    id={threadId._id}
+                    key={thread._id}
+                    id={thread._id}
                     currentUserId={user.id}
-                    parentId={threadId.parentId}
-                    content={threadId.text}
-                    author={threadId.author}
-                    community={threadId.community}
-                    createdAt={threadId.createdAt}
-                    comments={threadId.children}
+                    parentId={thread.parentId}
+                    content={thread.text}
+                    author={thread.author}
+                    community={thread.community}
+                    createdAt={thread.createdAt}
+                    comments={thread.children}
                 />
             </div>
-        </section>
-    )
-}
 
+            <div className="mt-7">
+                <Comment
+                    threadId={thread.id}
+                    currentUserImg={userInfo.image}
+                    currentUserId={JSON.stringify(userInfo._id)}
+                />
+            </div>
+            <div className='mt-10'>
+                {thread.children.map((childItem: any) => (
+                    <ThreadCard
+                        key={childItem._id}
+                        id={childItem._id}
+                        currentUserId={user.id}
+                        parentId={childItem.parentId}
+                        content={childItem.text}
+                        author={childItem.author}
+                        community={childItem.community}
+                        createdAt={childItem.createdAt}
+                        comments={childItem.children}
+                        isComment
+                    />
+                ))}
+            </div>
+        </section>
+    );
+}
 export default page;
