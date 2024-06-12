@@ -1,5 +1,5 @@
 "use server";
-
+export const dynamic = 'force-dynamic';
 import { FilterQuery, SortOrder } from "mongoose";
 import { revalidatePath } from "next/cache";
 
