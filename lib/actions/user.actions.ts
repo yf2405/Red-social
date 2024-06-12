@@ -11,11 +11,11 @@ import { connectToDB } from "../mongoose";
 
 export async function fetchUser(userId: string) {
     try {
-        connectToDB();
-
+        await connectToDB();
         return await User.findOne({ id: userId }).populate({
             path: "communities",
             model: Community,
+            select: "name", // Solo los campos necesarios
         });
     } catch (error: any) {
         throw new Error(`Failed to fetch user: ${error.message}`);

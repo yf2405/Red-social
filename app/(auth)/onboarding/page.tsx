@@ -1,34 +1,61 @@
-import AccountProfile from "@/components/forms/AccountProfile";
 import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
+import ThreadCard from "@/components/cards/ThreadCard";
+import Pagination from "@/components/shared/Pagination";
 
-async function Page() {
+import { fetchPosts } from "@/lib/actions/thread.actions";
+import { fetchUser } from "@/lib/actions/user.actions";
+
+async function Home({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | undefined };
+}) {
     const user = await currentUser();
+    if (!user) return null;
 
-    const userInfo = {}
+    const userInfo = await fetchUser(user.id);
+    if (!userInfo?.onboarded) redirect("/onboarding");
 
-    const userData = {
-        id: user.id,
-        objectId: userInfo?._id,
-        username: userInfo ? userInfo?.username : user.username,
-        name: userInfo ? userInfo?.name : user.firstName ?? "",
-        bio: userInfo ? userInfo?.bio : "",
-        image: userInfo ? userInfo?.image : user.imageUrl,
-    };
+    const result = await fetchPosts(
+        searchParams.page ? +searchParams.page : 1,
+        30
+    );
+
     return (
-        <main className='mx-auto flex max-w-3xl flex-col justify-start px-10 py-20'>
-            <h1 className='head-text'>Onboarding</h1>
-            <p className='mt-3 text-base-regular text-light-2'>
-                Complete your profile now, to use Threds.
-            </p>
+        <>
+            <h1 className='head-text text-left'>Home</h1>
 
-            <section className='mt-9 bg-dark-2 p-10'>
-                <AccountProfile
-                    user={userData}
-                    btnTitle="Continue"
-                />
+            <section className='mt-9 flex flex-col gap-10'>
+                {result.posts.length === 0 ? (
+                    <p className='no-result'>No threads found</p>
+                ) : (
+                    <>
+                        {result.posts.map((post) => (
+                            <ThreadCard
+                                key={post._id}
+                                id={post._id}
+                                currentUserId={user.id}
+                                parentId={post.parentId}
+                                content={post.text}
+                                author={post.author}
+                                community={post.community}
+                                createdAt={post.createdAt}
+                                comments={post.children}
+                            />
+                        ))}
+                    </>
+                )}
             </section>
-        </main>
+
+            <Pagination
+                path='/'
+                pageNumber={searchParams?.page ? +searchParams.page : 1}
+                isNext={result.isNext}
+            />
+        </>
     );
 }
-export default Page
+
+export default Home;
