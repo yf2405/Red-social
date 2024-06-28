@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider, ClerkLoaded, ClerkLoading } from '@clerk/nextjs'
 import { dark } from "@clerk/themes";
-
+// es-ES locale is imported as esES
+import { esES } from "@clerk/localizations";
 import "../globals.css";
 import Topbar from "@/components/shared/Topbar";
 import LeftSidebar from "@/components/shared/LeftSidebar";
@@ -27,6 +28,7 @@ export default function RootLayout({
       appearance={{
         baseTheme: dark,
       }}
+      localization={esES}
     >
       <html lang='en'>
         <body className={`${inter.className} bg-dark-1`}>
